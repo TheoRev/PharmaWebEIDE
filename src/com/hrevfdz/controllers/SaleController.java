@@ -20,328 +20,343 @@ import javax.faces.context.FacesContext;
 @ViewScoped
 public class SaleController {
 
-    private IPharmacy<Sale> dao;
+	private IPharmacy<Sale> dao;
 
-    private List<Sale> sales;
-    private Sale sale;
-    private Sale tempSale;
-    private List<StockProducto> stocks;
-    private StockProducto producto;    
-    private Date fecha;
-    private String accion;
-    private boolean estado;
+	private List<Sale> sales;
+	private Sale sale;
+	private Sale tempSale;
+	private List<StockProducto> stocks;
+	private StockProducto producto;
+	private Date fecha;
+	private String accion;
+	private boolean estado;
 
-    @PostConstruct
-    public void init() {
-        sale = new Sale();
-        tempSale = new Sale();
-        doFindAll();
-        doFindAllStock();
-    }
+	@PostConstruct
+	public void init() {
+		sale = new Sale();
+		tempSale = new Sale();
+		doFindAll();
+		doFindAllStock();
+	}
 
-    public void doFindAll() {
-        FacesMessage message = null;
-        dao = new SaleDAO();
+	public void doFindAll() {
+		FacesMessage message = null;
+		dao = new SaleDAO();
 
-        try {
-            sales = dao.findAll();
-        } catch (Exception ex) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
-        }
+		try {
+			sales = dao.findAll();
+		} catch (Exception ex) {
+			message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
+		}
 
-        if (message != null) {
-            FacesContext.getCurrentInstance().addMessage(null, message);
-        }
-    }
+		if (message != null) {
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
 
-    public void doFindAllStock() {
-        FacesMessage message = null;
-        IPharmacy<StockProducto> daoS = new StockProductoDAO();
+	public void doFindAllStock() {
+		FacesMessage message = null;
+		IPharmacy<StockProducto> daoS = new StockProductoDAO();
 
-        try {
-            stocks = daoS.findAll();
-        } catch (Exception ex) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
-        }
+		try {
+			stocks = daoS.findAll();
+		} catch (Exception ex) {
+			message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
+		}
 
-        if (message != null) {
-            FacesContext.getCurrentInstance().addMessage(null, message);
-        }
-    }
+		if (message != null) {
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
 
-    public void doFindStockByCod() {
-        FacesMessage message = null;
-        IPharmacy<StockProducto> daoS = new StockProductoDAO();
+	public void doFindStockByCod() {
+		FacesMessage message = null;
+		IPharmacy<StockProducto> daoS = new StockProductoDAO();
 
-        try {
-            List<StockProducto> lista = daoS.findByQuery(QueriesUtil.STOCK_X_COD + tempSale.getCodStock().getCodStock());
-            if (lista.size() == 1) {
-                for (StockProducto sp : lista) {
-                    producto = sp;
-                }
-            }
-        } catch (Exception ex) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
-        }
+		try {
+			List<StockProducto> lista = daoS
+					.findByQuery(QueriesUtil.STOCK_X_COD + tempSale.getCodStock().getCodStock());
+			if (lista.size() == 1) {
+				for (StockProducto sp : lista) {
+					producto = sp;
+				}
+			}
+		} catch (Exception ex) {
+			message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
+		}
 
-        if (message != null) {
-            FacesContext.getCurrentInstance().addMessage(null, message);
-        }
-    }
+		if (message != null) {
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
 
-    public void doFindByFecha() {
-        FacesMessage message = null;
-        dao = new SaleDAO();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	public void doFindByFecha() {
+		FacesMessage message = null;
+		dao = new SaleDAO();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-        final String query = "SELECT s FROM Sale s WHERE s.fecha = '" + sdf.format(fecha) + "'";
+		final String query = "SELECT s FROM Sale s WHERE s.fecha = '" + sdf.format(fecha) + "'";
 
-        try {
-            if (fecha != null) {
-                sales.clear();
-                sales = dao.findByQuery(query);
-            }
-        } catch (Exception ex) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
-        }
+		try {
+			if (fecha != null) {
+				sales.clear();
+				sales = dao.findByQuery(query);
+			}
+		} catch (Exception ex) {
+			message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR EN DB", ex.getMessage());
+		}
 
-        if (message != null) {
-            FacesContext.getCurrentInstance().addMessage(null, message);
-        }
-    }
+		if (message != null) {
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
 
-    public void calcSubtotal() {
-        double c = sale.getCantidad();
-        double p = producto.getMonto();
-        sale.setSubtotal(p * c);
-    }
+	public void calcSubtotal() {
+		double c = sale.getCantidad();
+		double p = producto.getMonto();
+		sale.setSubtotal(p * c);
+	}
 
-    public void doCreate() {
-        FacesMessage msg = null;
-        StockProductoDAO daoSt = new StockProductoDAO();
-        boolean result = false;
-        boolean resultST = false;
+	public void doCreate() {
+		FacesMessage msg = null;
+		StockProductoDAO daoSt = new StockProductoDAO();
+		boolean result = false;
+		boolean resultST = false;
 
-        try {
-            sale.setCodStock(producto);
+		try {
+			sale.setPrecio(producto.getMonto());
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			Date fec = new Date();
+			sale.setHora(sdf.parse(sdf.format(fec)));
 
-            List<StockProducto> sps = daoSt.findByQuery(QueriesUtil.STOCK_X_COD + producto.getCodStock());
-            StockProducto tempSt = new StockProducto();
+			sale.setCodStock(producto);
 
-            if (sps.size() == 1) {
-                for (StockProducto sp : sps) {
-                    tempSt = sp;
-                }
+			List<StockProducto> sps = daoSt.findByQuery(QueriesUtil.STOCK_X_COD + producto.getCodStock());
+			StockProducto tempSt = new StockProducto();
 
-                if (tempSt.getCantidad() >= sale.getCantidad()) {
-                    result = dao.Create(sale);
-                    producto.setCantidad(tempSt.getCantidad() - sale.getCantidad());
-                    resultST = daoSt.Update(producto);
+			if (sps.size() == 1) {
+				for (StockProducto sp : sps) {
+					tempSt = sp;
+				}
 
-                    if (result && resultST) {
-                        sales.add(sales.size(), sale);
-                        doFindAll();
-                        msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Datos guardados correctamente");
-                    } else {
-                        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecutó");
-                    }
-                } else {
-                    msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Stock insuficiante", "No cuenta con stock para realizar la venta");
-                    FacesContext.getCurrentInstance().addMessage(null, msg);
-                }
-            }
-        } catch (Exception e) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
-        }
+				if (tempSt.getCantidad() >= sale.getCantidad()) {
+					result = dao.Create(sale);
+					
+					if(result){
+						producto.setCantidad(tempSt.getCantidad() - sale.getCantidad());
+						resultST = daoSt.Update(producto);
+					}
 
-        FacesContext.getCurrentInstance().addMessage(null, msg);
-    }
+					if (result && resultST) {
+						sales.add(sales.size(), sale);
+						doFindAll();
+						msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Datos guardados correctamente");
+					} else {
+						msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecut�");
+					}
+				} else {
+					msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Stock insuficiante",
+							"No cuenta con stock para realizar la venta");
+					FacesContext.getCurrentInstance().addMessage(null, msg);
+				}
+			}
+		} catch (Exception e) {
+			msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
+		}
 
-    public void doUpdate(Sale s) {
-        FacesMessage msg = null;
-        dao = new SaleDAO();
-        StockProductoDAO daoSt = new StockProductoDAO();
-        boolean result = false;
-        boolean resultST = false;
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
 
-        try {
-            sale.setCodStock(producto);
+	public void doUpdate(Sale s) {
+		FacesMessage msg = null;
+		dao = new SaleDAO();
+		StockProductoDAO daoSt = new StockProductoDAO();
+		boolean result = false;
+		boolean resultST = false;
 
-            List<StockProducto> sps = daoSt.findByQuery(QueriesUtil.STOCK_X_COD + producto.getCodStock());
-            List<Sale> ses = dao.findByQuery(QueriesUtil.SALE_X_COD + sale.getCodSale());
-            StockProducto tempSt = new StockProducto();
-            Sale tempVenta = new Sale();
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+			Date fec = new Date();
+			sale.setHora(sdf.parse(sdf.format(fec)));
 
-            if (sps.size() == 1) {
-                for (StockProducto sp : sps) {
-                    tempSt = sp;
-                }
+			sale.setCodStock(producto);
 
-                for (Sale se : ses) {
-                    tempVenta = se;
-                }
+			List<StockProducto> sps = daoSt.findByQuery(QueriesUtil.STOCK_X_COD + producto.getCodStock());
+			List<Sale> ses = dao.findByQuery(QueriesUtil.SALE_X_COD + sale.getCodSale());
+			StockProducto tempSt = new StockProducto();
+			Sale tempVenta = new Sale();
 
-                if (tempSt.getCantidad() >= sale.getCantidad()) {
-                    result = dao.Update(sale);
-                    int venta = 0;
-                    if (tempVenta.getCantidad() > sale.getCantidad()) {
-                        venta = tempVenta.getCantidad() - sale.getCantidad();
-                        producto.setCantidad(producto.getCantidad() + venta);
-                    } else {
-                        venta = sale.getCantidad() - tempVenta.getCantidad();
-                        producto.setCantidad(producto.getCantidad() - venta);
-                    }
+			if (sps.size() == 1) {
+				for (StockProducto sp : sps) {
+					tempSt = sp;
+				}
 
-                    resultST = daoSt.Update(producto);
+				for (Sale se : ses) {
+					tempVenta = se;
+				}
 
-                    if (result && resultST) {
-                        sales.clear();
-                        doFindAll();
-                        sale = new Sale();
-                        msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Datos actualizados correctamente");
-                    } else {
-                        msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecutó");
-                    }
-                } else {
-                    msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Stock insuficiante", "No cuenta con stock para realizar la venta");
-                    FacesContext.getCurrentInstance().addMessage(null, msg);
-                }
+				if (tempSt.getCantidad() >= sale.getCantidad()) {
+					result = dao.Update(sale);
+					int venta = 0;
+					if (tempVenta.getCantidad() > sale.getCantidad()) {
+						venta = tempVenta.getCantidad() - sale.getCantidad();
+						producto.setCantidad(producto.getCantidad() + venta);
+					} else {
+						venta = sale.getCantidad() - tempVenta.getCantidad();
+						producto.setCantidad(producto.getCantidad() - venta);
+					}
 
-            }
+					resultST = daoSt.Update(producto);
 
-        } catch (Exception e) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
-        }
+					if (result && resultST) {
+						sales.clear();
+						doFindAll();
+						sale = new Sale();
+						msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Datos actualizados correctamente");
+					} else {
+						msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecutó");
+					}
+				} else {
+					msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Stock insuficiante",
+							"No cuenta con stock para realizar la venta");
+					FacesContext.getCurrentInstance().addMessage(null, msg);
+				}
 
-        FacesContext.getCurrentInstance().addMessage(null, msg);
-    }
+			}
 
-    public void doDelete(Sale s) {
-        FacesMessage msg = null;
-        dao = new SaleDAO();
-        StockProductoDAO daoSt = new StockProductoDAO();
+		} catch (Exception e) {
+			msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
+		}
 
-        boolean result = false;
-        boolean resultST = false;
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
 
-        try {
-            StockProducto sp = daoSt.findBy(QueriesUtil.STOCK_X_COD + producto.getCodStock());
-            producto.setCantidad(producto.getCantidad() + sale.getCantidad());
+	public void doDelete(Sale s) {
+		FacesMessage msg = null;
+		dao = new SaleDAO();
+		StockProductoDAO daoSt = new StockProductoDAO();
 
-            resultST = daoSt.Update(producto);
+		boolean result = false;
+		boolean resultST = false;
 
-            if (resultST) {
-                msg = null;
-            } else {
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "NO se pudo reponer el Stock");
-            }
+		try {
+			StockProducto sp = daoSt.findBy(QueriesUtil.STOCK_X_COD + producto.getCodStock());
+			producto.setCantidad(producto.getCantidad() + sale.getCantidad());
 
-            result = dao.Delete(s);
+			resultST = daoSt.Update(producto);
 
-            if (result) {
-                sales.clear();
-                doFindAll();
-                sale = new Sale();
-                msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Se eliminó correctamente");
-            } else {
-                msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecutó");
-            }
-        } catch (Exception e) {
-            msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
-        }
+			if (resultST) {
+				msg = null;
+			} else {
+				msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "NO se pudo reponer el Stock");
+			}
 
-        FacesContext.getCurrentInstance().addMessage(null, msg);
-    }
+			result = dao.Delete(s);
 
-    public void doNew() {
-        accion = AccionUtil.CREATE;
-        sale = new Sale();
-        doFindAllStock();
-        estado = false;
-    }
+			if (result) {
+				sales.clear();
+				doFindAll();
+				sale = new Sale();
+				msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "INFO", "Se eliminó correctamente");
+			} else {
+				msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "El proceso no se ejecutó");
+			}
+		} catch (Exception e) {
+			msg = new FacesMessage(FacesMessage.SEVERITY_FATAL, "FATAL ERROR", e.getMessage());
+		}
 
-    public void doUpgrade(Sale s) {
-        accion = AccionUtil.UPDATE;
-        sale = s;
-        doFindAllStock();
-        tempSale = sale;
-        doFindStockByCod();
-        estado = true;
-    }
+		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
 
-    public void doExecute() {
-        switch (accion) {
-            case AccionUtil.CREATE:
-                doCreate();
-                break;
-            case AccionUtil.UPDATE:
-                doUpdate(sale);
-                break;
-        }
-    }
+	public void doNew() {
+		accion = AccionUtil.CREATE;
+		sale = new Sale();
+		doFindAllStock();
+		estado = false;
+	}
 
-    public List<Sale> getSales() {
-        return sales;
-    }
+	public void doUpgrade(Sale s) {
+		accion = AccionUtil.UPDATE;
+		sale = s;
+		doFindAllStock();
+		tempSale = sale;
+		doFindStockByCod();
+		estado = true;
+	}
 
-    public void setSales(List<Sale> sales) {
-        this.sales = sales;
-    }
+	public void doExecute() {
+		switch (accion) {
+		case AccionUtil.CREATE:
+			doCreate();
+			break;
+		case AccionUtil.UPDATE:
+			doUpdate(sale);
+			break;
+		}
+	}
 
-    public Sale getSale() {
-        return sale;
-    }
+	public List<Sale> getSales() {
+		return sales;
+	}
 
-    public void setSale(Sale sale) {
-        this.sale = sale;
-    }
+	public void setSales(List<Sale> sales) {
+		this.sales = sales;
+	}
 
-    public List<StockProducto> getStocks() {
-        return stocks;
-    }
+	public Sale getSale() {
+		return sale;
+	}
 
-    public void setStocks(List<StockProducto> stocks) {
-        this.stocks = stocks;
-    }
+	public void setSale(Sale sale) {
+		this.sale = sale;
+	}
 
-    public StockProducto getProducto() {
-        return producto;
-    }
+	public List<StockProducto> getStocks() {
+		return stocks;
+	}
 
-    public void setProducto(StockProducto producto) {
-        this.producto = producto;
-    }
+	public void setStocks(List<StockProducto> stocks) {
+		this.stocks = stocks;
+	}
 
-    public String getAccion() {
-        return accion;
-    }
+	public StockProducto getProducto() {
+		return producto;
+	}
 
-    public void setAccion(String accion) {
-        this.accion = accion;
-    }
+	public void setProducto(StockProducto producto) {
+		this.producto = producto;
+	}
 
-    public Sale getTempSale() {
-        return tempSale;
-    }
+	public String getAccion() {
+		return accion;
+	}
 
-    public void setTempSale(Sale tempSale) {
-        this.tempSale = tempSale;
-    }
+	public void setAccion(String accion) {
+		this.accion = accion;
+	}
 
-    public Date getFecha() {
-        return fecha;
-    }
+	public Sale getTempSale() {
+		return tempSale;
+	}
 
-    public void setFecha(Date fecha) {
-        this.fecha = fecha;
-    }
+	public void setTempSale(Sale tempSale) {
+		this.tempSale = tempSale;
+	}
 
-    public boolean isEstado() {
-        return estado;
-    }
+	public Date getFecha() {
+		return fecha;
+	}
 
-    public void setEstado(boolean estado) {
-        this.estado = estado;
-    }
+	public void setFecha(Date fecha) {
+		this.fecha = fecha;
+	}
+
+	public boolean isEstado() {
+		return estado;
+	}
+
+	public void setEstado(boolean estado) {
+		this.estado = estado;
+	}
 
 }

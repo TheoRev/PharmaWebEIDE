@@ -6,6 +6,7 @@
 package com.hrevfdz.models;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -24,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author theo
+ * @author lheo2
  */
 @Entity
 @Table(name = "sale", catalog = "farmasur", schema = "pharmacy")
@@ -35,7 +36,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     , @NamedQuery(name = "Sale.findByCantidad", query = "SELECT s FROM Sale s WHERE s.cantidad = :cantidad")
     , @NamedQuery(name = "Sale.findByPrecio", query = "SELECT s FROM Sale s WHERE s.precio = :precio")
     , @NamedQuery(name = "Sale.findBySubtotal", query = "SELECT s FROM Sale s WHERE s.subtotal = :subtotal")
-    , @NamedQuery(name = "Sale.findByFecha", query = "SELECT s FROM Sale s WHERE s.fecha = :fecha")})
+    , @NamedQuery(name = "Sale.findByFecha", query = "SELECT s FROM Sale s WHERE s.fecha = :fecha")
+    , @NamedQuery(name = "Sale.findByHora", query = "SELECT s FROM Sale s WHERE s.hora = :hora")})
 public class Sale implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -56,6 +58,10 @@ public class Sale implements Serializable {
     @Column(name = "fecha")
     @Temporal(TemporalType.DATE)
     private Date fecha;
+    @Basic(optional = false)
+    @Column(name = "hora")
+    @Temporal(TemporalType.TIME)
+    private Date hora;
     @JoinColumn(name = "cod_stock", referencedColumnName = "cod_stock")
     @ManyToOne(optional = false)
     private StockProducto codStock;
@@ -67,11 +73,12 @@ public class Sale implements Serializable {
         this.codSale = codSale;
     }
 
-    public Sale(Integer codSale, Integer cantidad, double precio, Date fecha) {
+    public Sale(Integer codSale, Integer cantidad, double precio, Date fecha, Date hora) {
         this.codSale = codSale;
         this.cantidad = cantidad;
         this.precio = precio;
         this.fecha = fecha;
+        this.hora = hora;
     }
 
     public Integer getCodSale() {
@@ -112,6 +119,14 @@ public class Sale implements Serializable {
 
     public void setFecha(Date fecha) {
         this.fecha = fecha;
+    }
+
+    public Date getHora() {
+        return hora;
+    }
+
+    public void setHora(Date hora) {
+        this.hora = hora;
     }
 
     public StockProducto getCodStock() {
