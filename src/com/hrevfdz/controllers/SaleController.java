@@ -10,6 +10,8 @@ import com.hrevfdz.util.QueriesUtil;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -141,8 +143,8 @@ public class SaleController {
 
 				if (tempSt.getCantidad() >= sale.getCantidad()) {
 					result = dao.Create(sale);
-					
-					if(result){
+
+					if (result) {
 						producto.setCantidad(tempSt.getCantidad() - sale.getCantidad());
 						resultST = daoSt.Update(producto);
 					}
@@ -266,6 +268,11 @@ public class SaleController {
 		}
 
 		FacesContext.getCurrentInstance().addMessage(null, msg);
+	}
+
+	public TimeZone getTimeZone() {
+		TimeZone timeZone = TimeZone.getDefault();
+		return timeZone;
 	}
 
 	public void doNew() {
