@@ -12,12 +12,12 @@
 	<h:form id="frmIngProd" styleClass="form-style">
 		<p:growl id="msgIngProd" showDetail="true" />
 		<p:dialog closable="true" widgetVar="dlgIngProd" id="idDlgIngProd"
-			showEffect="explode" hideEffect="explode" width="570">
+			showEffect="explode" hideEffect="explode" width="720">
 			<p:outputLabel value="Fecha" />&nbsp;
             <p:calendar pattern="dd/MM/yyyy" navigator="true"
 				effect="fold" />
 
-			<p:panel id="pnlLIngProd" styleClass="panel-content"
+			<p:panel id="pnlIngProd" styleClass="panel-content"
 				header="Productos Ingresados y/o Actualizados">
 				<p:dataTable id="tblIngProd" rows="10" paginator="true"
 					value="#{ingresoProdController.ingresoProductos}" var="ip"

@@ -80,14 +80,16 @@
 									oncomplete="PF('dlgConfirmDeleteStock').show()"
 									action="#{stockController.doUpgrade(sp)}" />
 							</div>
-						</p:column>
-						
-						<f:facet name="footer">
-							<p:commandButton value="Ingreso de Productos"
-							icon="fa fa-product-hunt"
-							style="float: left;"/>
-						</f:facet>
+						</p:column>												
 					</p:dataTable>
+					
+					<f:facet name="footer">
+							<p:commandButton value="Ingreso de Productos"
+							style="float: left;"
+							icon="fa fa-product-hunt"
+							update=":frmIngProd:pnlIngProd"
+							oncomplete="PF('dlgIngProd').show()"/>
+						</f:facet>
 				</p:panel>
 			</h:form>
 

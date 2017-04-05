@@ -28,7 +28,8 @@ public class IngresoProductoDAO extends PharmacyService<IngresoProducto> {
 
     @Override
     public List<IngresoProducto> findAll() throws Exception {
-       return super.findAll();
+    	super.setCod("codigo");
+        return super.findAll();
     }
 
     @Override
